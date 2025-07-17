@@ -87,6 +87,14 @@ if selected_planet:
 
     plot_area, graph_area = st.columns(2)
 
+    fig2, ax2 = plt.subplots(figsize=(3.5, 3.5))
+    ax2.set_xlabel("Time (years)")
+    ax2.set_ylabel("Orbital Speed (scaled km/s)")
+    ax2.set_title("Orbital Speed vs Time")
+    ax2.grid(True)
+    line2, = ax2.plot([], [], color='green')
+    graph_plot = st.empty()
+
     for i in range(total_frames):
         x, y = positions[i]
         vx = -np.sin(thetas[i]) * velocities[i]
@@ -106,18 +114,15 @@ if selected_planet:
         ax1.set_title(f"{selected_planet} - Time: {times[i]:.2f} yr")
         ax1.grid(True)
 
-        # 속도 그래프 (실시간 업데이트)
-        fig2, ax2 = plt.subplots(figsize=(3.5, 3.5))
-        ax2.plot(times[:i+1], velocities[:i+1], color='green')
-        ax2.set_xlabel("Time (years)")
-        ax2.set_ylabel("Orbital Speed (scaled km/s)")
-        ax2.set_title("Orbital Speed vs Time")
-        ax2.grid(True)
-
         with plot_area:
             st.pyplot(fig1)
+
+        # 실시간 그래프 업데이트
+        line2.set_data(times[:i+1], velocities[:i+1])
+        ax2.set_xlim(0, max(times))
+        ax2.set_ylim(0, max(velocities)*1.1)
         with graph_area:
-            st.pyplot(fig2)
+            graph_plot.pyplot(fig2)
 
         time.sleep(simulation_speed)
 else:
