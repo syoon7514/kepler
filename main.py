@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import time
 
 st.set_page_config(layout="wide")
-st.title("🌞 Kepler Orbit Simulator – Velocity vs Time + Scaled Eccentricity")
+st.title("🌞 태양계 케플러 법칙 시뮬레이터")
 
 # 태양계 행성 데이터
 planet_data = {
@@ -36,12 +36,7 @@ if selected_planet:
     a = planet_data[selected_planet]["a"]
     e_real = planet_data[selected_planet]["e"]
     e = min(e_real * e_scale, 0.9)
-    T = planet_data[selected_planet]["T"]
-
-    st.markdown(f"""
-    **Selected Planet**: {selected_planet}  
-    Real eccentricity: {e_real:.3f} → Scaled eccentricity: **{e:.3f}**  
-    Semi-major axis: **a = {a:.3f} AU**, Orbital Period: **T = {T:.3f} yr**
+    T = planet_data[selecte기: **T = {T:.3f} yr**
     """)
 
     GMsun = 4 * np.pi**2  # AU^3 / yr^2
@@ -102,23 +97,23 @@ if selected_planet:
             st.pyplot(fig2)
 
         time.sleep(0.05)
-        
-        def sector_area(r1, r2, dtheta):
+  # 부채꼴 면적 계산 함수
+    def sector_area(r1, r2, dtheta):
         return 0.5 * r1 * r2 * abs(dtheta)
 
+    # 초반 및 후반 20% 면적 계산
     steps_20 = int(total_steps * 0.2)
-    start_area = sum(
+    start_area_sector = sum(
         sector_area(rs[i], rs[i+1], thetas[i+1] - thetas[i]) for i in range(steps_20-1)
     )
-    end_area = sum(
+    end_area_sector = sum(
         sector_area(rs[-i-2], rs[-i-1], thetas[-i-1] - thetas[-i-2]) for i in range(steps_20-1)
     )
 
-    st.markdown("""
-    ### 📐 케플러 제2법칙: 면적 비교
-    - 공전 초반 20% 부채꼴 면적: {:.5f} AU²  
-    - 공전 마지막 20% 부채꼴 면적: {:.5f} AU²  
-    👉 두 면적이 거의 동일함을 통해 **같은 시간 동안 같은 면적을 휩쓴다**는 법칙을 확인할 수 있어요.
-    """.format(start_area, end_area))
-else:
-    st.info("Click a planet above to begin the simulation.")
+    st.markdown("### 📐 케플러 제2법칙: 부채꼴 면적 계산")
+    st.markdown(f"""
+    - **공전 초반 20% 부채꼴 면적**: {start_area_sector:.5f} AU²  
+    - **공전 마지막 20% 부채꼴 면적**: {end_area_sector:.5f} AU²  
+    👉 두 면적이 유사함을 통해 **면적 속도 일정성(케플러 제2법칙)**을 확인할 수 있습니다.
+    """)
+    st.info("행성을 선택하면 시뮬레이션이 시작됩니다.")
