@@ -21,7 +21,7 @@ planet_data = {
 e_scale = 5  # 이심률 과장 배율
 
 # 행성 선택 UI
-st.subheader("🌍 Select a Planet")
+st.subheader("🌍 행성을 선택하세요")
 cols = st.columns(len(planet_data))
 selected_planet = None
 for i, (name, _) in enumerate(planet_data.items()):
@@ -35,28 +35,31 @@ if selected_planet:
     e = min(e_real * e_scale, 0.9)
     T = planet_data[selected_planet]["T"]
 
-    st.markdown(f"**Orbital Period**: T = {T:.3f} yr")
-
     GMsun = 4 * np.pi**2  # AU^3 / yr^2
 
+    # 고정된 시간 간격 (dt), 공전 주기에 따라 total_steps 조정
+    dt = 0.05  # 0.01년 간격
+    total_steps = int(T / dt)
+
+    # 궤도 전체 그리기용 좌표
     theta_all = np.linspace(0, 2*np.pi, 500)
     r_all = a * (1 - e**2) / (1 + e * np.cos(theta_all))
     x_orbit = r_all * np.cos(theta_all)
     y_orbit = r_all * np.sin(theta_all)
 
-    plot_area = st.empty()
-    graph_area = st.empty()
+    # 부채꼴 면적 계산용 리스트
     velocities = []
     times = []
     rs = []
     thetas = []
 
-    total_steps = 180
-    dt = T / total_steps  # 시간 간격 (년 단위)
+    plot_area = st.empty()
+    graph_area = st.empty()
 
+    # 시뮬레이션 루프
     for step in range(total_steps):
         t = step * dt
-        theta = 2 * np.pi * (t / T)  # 등시간 각도 진행 (단순 근사)
+        theta = 2 * np.pi * (t / T)  # 단순 근사
         r = a * (1 - e**2) / (1 + e * np.cos(theta))
         x = r * np.cos(theta)
         y = r * np.sin(theta)
@@ -65,7 +68,7 @@ if selected_planet:
         vx = -v * np.sin(theta)
         vy = v * np.cos(theta)
 
-        velocities.append(v * 30)  # 약 30배 축소 (km/s 비율)
+        velocities.append(v * 30)
         times.append(t)
         rs.append(r)
         thetas.append(theta)
@@ -85,7 +88,7 @@ if selected_planet:
         ax1.legend()
         ax1.grid(True)
 
-        # 속도 그래프
+        # 속도-시간 그래프
         fig2, ax2 = plt.subplots()
         ax2.plot(times, velocities, color='green')
         ax2.set_xlabel("Time (years)")
@@ -98,13 +101,12 @@ if selected_planet:
         with graph_area:
             st.pyplot(fig2)
 
-        time.sleep(0.05)
+        time.sleep(0.03)
 
     # 부채꼴 면적 계산 함수
     def sector_area(r1, r2, dtheta):
         return 0.5 * r1 * r2 * abs(dtheta)
 
-    # 초반 및 후반 20% 면적 계산
     steps_20 = int(total_steps * 0.2)
     start_area_sector = sum(
         sector_area(rs[i], rs[i+1], thetas[i+1] - thetas[i]) for i in range(steps_20-1)
@@ -113,8 +115,13 @@ if selected_planet:
         sector_area(rs[-i-2], rs[-i-1], thetas[-i-1] - thetas[-i-2]) for i in range(steps_20-1)
     )
 
-    st.markdown("### 📐 케플러 제2법칙: 부채꼴 면적 계산")
+    # 텍스트 + 면적 비교 출력
     st.markdown(f"""
+    **선택한 행성**: {selected_planet}  
+    실제 이심률: {e_real:.3f} → 과장된 이심률: **{e:.3f}**  
+    공전 반지름 a = {a:.3f} AU, 공전 주기 T = {T:.3f} 년  
+
+    ### 📐 케플러 제2법칙: 부채꼴 면적 계산  
     - **공전 초반 20% 부채꼴 면적**: {start_area_sector:.5f} AU²  
     - **공전 마지막 20% 부채꼴 면적**: {end_area_sector:.5f} AU²  
     👉 두 면적이 유사함을 통해 **면적 속도 일정성(케플러 제2법칙)**을 확인할 수 있습니다.
