@@ -102,5 +102,23 @@ if selected_planet:
             st.pyplot(fig2)
 
         time.sleep(0.05)
+        
+        def sector_area(r1, r2, dtheta):
+        return 0.5 * r1 * r2 * abs(dtheta)
+
+    steps_20 = int(total_steps * 0.2)
+    start_area = sum(
+        sector_area(rs[i], rs[i+1], thetas[i+1] - thetas[i]) for i in range(steps_20-1)
+    )
+    end_area = sum(
+        sector_area(rs[-i-2], rs[-i-1], thetas[-i-1] - thetas[-i-2]) for i in range(steps_20-1)
+    )
+
+    st.markdown("""
+    ### 📐 케플러 제2법칙: 면적 비교
+    - 공전 초반 20% 부채꼴 면적: {:.5f} AU²  
+    - 공전 마지막 20% 부채꼴 면적: {:.5f} AU²  
+    👉 두 면적이 거의 동일함을 통해 **같은 시간 동안 같은 면적을 휩쓴다**는 법칙을 확인할 수 있어요.
+    """.format(start_area, end_area))
 else:
     st.info("Click a planet above to begin the simulation.")
