@@ -127,7 +127,7 @@ if selected_planet:
         with graph_area:
             st.pyplot(fig2)
 
-        time.sleep(0.01)
+        time.sleep(0.001)
 
 else:
     st.info("행성을 선택하면 시뮬레이션이 시작됩니다.")
