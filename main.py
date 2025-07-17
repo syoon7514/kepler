@@ -104,7 +104,7 @@ if selected_planet:
         ax1.plot(x_orbit, y_orbit, 'gray', lw=1, label='Orbit Path')
         ax1.plot(0, 0, 'yo', label='Sun')
         ax1.plot(x, y, 'bo', label='Planet')
-        ax1.quiver(x, y, vx, vy, color='red', scale=15, width=0.007, label='Velocity Vector')
+        ax1.quiver(x, y, vx, vy, color='red', scale=30, width=0.007, label='Velocity Vector')
         ax1.set_aspect('equal')
         ax1.set_xlim(-2*a, 2*a)
         ax1.set_ylim(-1.5*a, 1.5*a)
