@@ -19,7 +19,6 @@ planet_data = {
 }
 
 e_scale = 5  # 이심률 과장 배율
-base_steps = 1800  # 기준 행성(지구) 프레임 수
 
 # 행성 선택 UI
 st.subheader("🌍 Select a Planet")
@@ -33,18 +32,10 @@ for i, (name, _) in enumerate(planet_data.items()):
 if selected_planet:
     a = planet_data[selected_planet]["a"]
     e_real = planet_data[selected_planet]["e"]
-    T = planet_data[selected_planet]["T"]
     e = min(e_real * e_scale, 0.9)
+    T = planet_data[selected_planet]["T"]
 
-    total_steps = int(base_steps * T)  # 공전주기에 비례하는 스텝 수
-    dt = 1 / base_steps  # 프레임 간 시간 간격 고정 (1년 기준)
-
-    st.markdown(f"""
-    ### ℹ️ 행성 정보
-    - **공전 반지름**: {a:.3f} AU  
-    - **이심률 (5배 보정값)**: {e:.3f} (real: {e_real:.3f})  
-    - **공전 주기**: T = {T:.3f} yr  
-    """)
+    st.markdown(f"**Orbital Period**: T = {T:.3f} yr")
 
     GMsun = 4 * np.pi**2  # AU^3 / yr^2
 
@@ -53,12 +44,15 @@ if selected_planet:
     x_orbit = r_all * np.cos(theta_all)
     y_orbit = r_all * np.sin(theta_all)
 
+    plot_area = st.empty()
+    graph_area = st.empty()
     velocities = []
     times = []
     rs = []
     thetas = []
 
-    plot_col, graph_col = st.columns(2)
+    total_steps = 180
+    dt = T / total_steps  # 시간 간격 (년 단위)
 
     for step in range(total_steps):
         t = step * dt
@@ -71,13 +65,13 @@ if selected_planet:
         vx = -v * np.sin(theta)
         vy = v * np.cos(theta)
 
-        velocities.append(v * 30)  # km/s 비율 조정
+        velocities.append(v * 30)  # 약 30배 축소 (km/s 비율)
         times.append(t)
         rs.append(r)
         thetas.append(theta)
 
         # 궤도 그래프
-        fig1, ax1 = plt.subplots(figsize=(4, 4))
+        fig1, ax1 = plt.subplots(figsize=(6, 6))
         ax1.plot(x_orbit, y_orbit, 'gray', lw=1, label='Orbit Path')
         ax1.plot(0, 0, 'yo', label='Sun')
         ax1.plot(x, y, 'bo', label='Planet')
@@ -92,19 +86,19 @@ if selected_planet:
         ax1.grid(True)
 
         # 속도 그래프
-        fig2, ax2 = plt.subplots(figsize=(4, 4))
+        fig2, ax2 = plt.subplots()
         ax2.plot(times, velocities, color='green')
         ax2.set_xlabel("Time (years)")
         ax2.set_ylabel("Orbital Speed (scaled km/s)")
         ax2.set_title("Orbital Speed - Time")
         ax2.grid(True)
 
-        with plot_col:
+        with plot_area:
             st.pyplot(fig1)
-        with graph_col:
+        with graph_area:
             st.pyplot(fig2)
 
-        time.sleep(0.01)  # 실시간 처리용 지연
+        time.sleep(0.05)
 
     # 부채꼴 면적 계산 함수
     def sector_area(r1, r2, dtheta):
