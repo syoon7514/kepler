@@ -33,7 +33,7 @@ if selected_planet:
     T = planet_data[selected_planet]["T"]
 
     GMsun = 4 * np.pi**2
-    dt = 0.08
+    dt = 0.03
     total_steps = int(T / dt)
 
     times = []
