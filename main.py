@@ -52,7 +52,6 @@ if selected_planet:
     y_orbit = r_all * np.sin(theta_all)
 
     plot_area = st.empty()
-    graph_area = st.empty()
     velocities = []
     times = []
     thetas = []
@@ -114,14 +113,13 @@ if selected_planet:
     👉 두 면적이 거의 동일함을 통해 **같은 시간 동안 같은 면적을 휩쓴다**는 법칙을 확인할 수 있어요.
     """.format(start_area, end_area))
 
+    st.subheader("\U0001F4C8 속도 - 시간 그래프")
     fig2, ax2 = plt.subplots(figsize=(6, 4))
     ax2.plot(times, velocities, color='green')
     ax2.set_xlabel("Time (years)")
     ax2.set_ylabel("Orbital Speed (scaled km/s)")
     ax2.set_title("Orbital Speed vs Time")
     ax2.grid(True)
-
-    with graph_area:
-        st.pyplot(fig2)
+    st.pyplot(fig2)
 else:
     st.info("행성을 선택하면 시뮬레이션이 시작됩니다.")
