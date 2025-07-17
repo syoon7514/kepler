@@ -6,6 +6,7 @@ import time
 st.set_page_config(layout="wide")
 st.title("🌞 태양계 케플러 법칙 시뮬레이터")
 
+# 태양계 행성 데이터
 planet_data = {
     "Mercury": {"a": 0.387, "e": 0.206, "T": 0.241},
     "Venus": {"a": 0.723, "e": 0.007, "T": 0.615},
@@ -17,8 +18,10 @@ planet_data = {
     "Neptune": {"a": 30.07, "e": 0.009, "T": 164.8}
 }
 
-e_scale = 5
+e_scale = 5  # 이심률 과장 배율
+max_steps = 100  # 시뮬레이션 프레임 최대 수
 
+# 행성 선택 UI
 st.subheader("🌍 행성을 선택하세요")
 cols = st.columns(len(planet_data))
 selected_planet = None
@@ -33,14 +36,20 @@ if selected_planet:
     T = planet_data[selected_planet]["T"]
 
     GMsun = 4 * np.pi**2
-    dt = 0.03
-    total_steps = int(T / dt)
 
-    times = []
-    thetas = []
-    rs = []
-    velocities = []
+    # 프레임 수 조정: 최대 max_steps 이하로
+    default_dt = 0.01  # 기본 간격
+    total_steps = min(max_steps, int(T / default_dt))
+    dt = T / total_steps  # 행성별 고정 시간 간격
 
+    # 궤도 좌표 계산
+    theta_all = np.linspace(0, 2*np.pi, 500)
+    r_all = a * (1 - e**2) / (1 + e * np.cos(theta_all))
+    x_orbit = r_all * np.cos(theta_all)
+    y_orbit = r_all * np.sin(theta_all)
+
+    # 시뮬레이션 데이터 생성
+    times, thetas, rs, velocities = [], [], [], []
     for step in range(total_steps):
         t = step * dt
         theta = 2 * np.pi * (t / T)
@@ -52,15 +61,16 @@ if selected_planet:
         rs.append(r)
         velocities.append(v * 30)
 
+    # 부채꼴 면적 계산
     def sector_area(r1, r2, dtheta):
         return 0.5 * r1 * r2 * abs(dtheta)
 
     steps_20 = int(total_steps * 0.2)
     start_area_sector = sum(
-        sector_area(rs[i], rs[i+1], thetas[i+1] - thetas[i]) for i in range(steps_20-1)
+        sector_area(rs[i], rs[i+1], thetas[i+1] - thetas[i]) for i in range(steps_20 - 1)
     )
     end_area_sector = sum(
-        sector_area(rs[-i-2], rs[-i-1], thetas[-i-1] - thetas[-i-2]) for i in range(steps_20-1)
+        sector_area(rs[-i-2], rs[-i-1], thetas[-i-1] - thetas[-i-2]) for i in range(steps_20 - 1)
     )
 
     # 텍스트 먼저 출력
@@ -68,18 +78,13 @@ if selected_planet:
     **선택한 행성**: {selected_planet}  
     실제 이심률: {e_real:.3f} → 과장된 이심률: **{e:.3f}**  
     공전 반지름 a = {a:.3f} AU, 공전 주기 T = {T:.3f} 년  
+    시뮬레이션 프레임 수 = {total_steps}개, 시간 간격 = {dt:.4f}년  
 
     ### 📐 케플러 제2법칙: 부채꼴 면적 계산  
     - **공전 초반 20% 부채꼴 면적**: {start_area_sector:.5f} AU²  
     - **공전 마지막 20% 부채꼴 면적**: {end_area_sector:.5f} AU²  
     👉 두 면적이 유사함을 통해 **면적 속도 일정성(케플러 제2법칙)**을 확인할 수 있습니다.
     """)
-
-    # 궤도 전체 경로
-    theta_all = np.linspace(0, 2*np.pi, 500)
-    r_all = a * (1 - e**2) / (1 + e * np.cos(theta_all))
-    x_orbit = r_all * np.cos(theta_all)
-    y_orbit = r_all * np.sin(theta_all)
 
     plot_area = st.empty()
     graph_area = st.empty()
@@ -89,12 +94,12 @@ if selected_planet:
         r = rs[step]
         t = times[step]
         v_scaled = velocities[step]
-
         x = r * np.cos(theta)
         y = r * np.sin(theta)
         vx = -v_scaled / 30 * np.sin(theta)
         vy = v_scaled / 30 * np.cos(theta)
 
+        # 궤도 그래프
         fig1, ax1 = plt.subplots(figsize=(6, 6))
         ax1.plot(x_orbit, y_orbit, 'gray', lw=1, label='Orbit Path')
         ax1.plot(0, 0, 'yo', label='Sun')
@@ -109,6 +114,7 @@ if selected_planet:
         ax1.legend()
         ax1.grid(True)
 
+        # 속도 그래프
         fig2, ax2 = plt.subplots()
         ax2.plot(times[:step+1], velocities[:step+1], color='green')
         ax2.set_xlabel("Time (years)")
@@ -121,6 +127,7 @@ if selected_planet:
         with graph_area:
             st.pyplot(fig2)
 
-        time.sleep(0.03)
+        time.sleep(0.01)
+
 else:
     st.info("행성을 선택하면 시뮬레이션이 시작됩니다.")
