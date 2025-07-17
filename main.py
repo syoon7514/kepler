@@ -39,10 +39,11 @@ if selected_planet:
     total_steps = int(base_steps * T)  # 공전주기에 비례하는 스텝 수
     dt = 1 / base_steps  # 프레임 간 시간 간격 고정 (1년 기준)
 
-  st.markdown(f"""
-    **선택한 행성**: {selected_planet}  
-    실제 이심률: {e_real:.3f} → 과장된 이심률: **{e:.3f}**  
-    공전 반지름 a = {a:.3f} AU, 공전 주기 T = {T:.3f} 년
+    st.markdown(f"""
+    ### ℹ️ 행성 정보
+    - **공전 반지름**: {a:.3f} AU  
+    - **이심률 (5배 보정값)**: {e:.3f} (real: {e_real:.3f})  
+    - **공전 주기**: T = {T:.3f} yr  
     """)
 
     GMsun = 4 * np.pi**2  # AU^3 / yr^2
