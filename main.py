@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import time
 
 st.set_page_config(layout="wide")
-st.title("\U0001F30C 태양계 행성의 케플러 법칙 시뮬레이터")
+st.title("\U0001F30C 태양계 행성의 케플러 법 시뮬레이터")
 
 # 태양계 행성 데이터
 planet_data = {
@@ -19,9 +19,7 @@ planet_data = {
 }
 
 e_scale = 5  # 이심률 과장 배율
-total_duration = 30  # 전체 애니메이션 시간 (초)
 simulation_speed = 0.03  # 1프레임당 시간 (초)
-total_frames = int(total_duration / simulation_speed)
 
 # 행성 선택 UI
 st.subheader("\U0001FA90 행성을 선택하세요")
@@ -37,10 +35,10 @@ if selected_planet:
     e = min(e_real * e_scale, 0.9)
     T = planet_data[selected_planet]["T"]
 
-    # 공통 프레임 수를 가지면서 주기에 비례한 시간 간격 설정
-    dt = T / total_frames
-
     GMsun = 4 * np.pi**2
+
+    total_frames = int(T / simulation_speed)
+    dt = simulation_speed
 
     theta_all = np.linspace(0, 2*np.pi, 500)
     r_all = a * (1 - e**2) / (1 + e * np.cos(theta_all))
@@ -87,20 +85,11 @@ if selected_planet:
 
     plot_area, graph_area = st.columns(2)
 
-    fig2, ax2 = plt.subplots(figsize=(3.5, 3.5))
-    ax2.set_xlabel("Time (years)")
-    ax2.set_ylabel("Orbital Speed (scaled km/s)")
-    ax2.set_title("Orbital Speed vs Time")
-    ax2.grid(True)
-    line2, = ax2.plot([], [], color='green')
-    graph_plot = st.empty()
-
     for i in range(total_frames):
         x, y = positions[i]
         vx = -np.sin(thetas[i]) * velocities[i]
         vy = np.cos(thetas[i]) * velocities[i]
 
-        # 공전 궤도 그래프
         fig1, ax1 = plt.subplots(figsize=(3.5, 3.5))
         ax1.plot(x_orbit, y_orbit, 'gray', lw=1)
         ax1.plot(0, 0, 'yo')
@@ -117,13 +106,15 @@ if selected_planet:
         with plot_area:
             st.pyplot(fig1)
 
-        # 실시간 그래프 업데이트
-        line2.set_data(times[:i+1], velocities[:i+1])
-        ax2.set_xlim(0, max(times))
-        ax2.set_ylim(0, max(velocities)*1.1)
-        with graph_area:
-            graph_plot.pyplot(fig2)
-
         time.sleep(simulation_speed)
+
+    fig2, ax2 = plt.subplots(figsize=(3.5, 3.5))
+    ax2.plot(times, velocities, color='green')
+    ax2.set_xlabel("Time (years)")
+    ax2.set_ylabel("Orbital Speed (scaled km/s)")
+    ax2.set_title("Orbital Speed vs Time")
+    ax2.grid(True)
+    with graph_area:
+        st.pyplot(fig2)
 else:
     st.info("행성을 선택하면 시뮬레이션이 시작됩니다.")
