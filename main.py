@@ -36,9 +36,7 @@ if selected_planet:
     a = planet_data[selected_planet]["a"]
     e_real = planet_data[selected_planet]["e"]
     e = min(e_real * e_scale, 0.9)
-    T = planet_data[selecte기: **T = {T:.3f} yr**
-    """)
-
+    st.markdown(f"**Orbital Period**: T = {T:.3f} yr")
     GMsun = 4 * np.pi**2  # AU^3 / yr^2
 
     theta_all = np.linspace(0, 2*np.pi, 500)
